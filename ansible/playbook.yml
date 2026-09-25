@@ -1,0 +1,30 @@
+---
+- name: Deploy Java DevOps Application
+  hosts: app
+  become: true
+
+  vars:
+    docker_image: "farhadbaig/java-devops-k8s-project:latest"
+    container_name: "java-devops-app"
+    app_port: "8080"
+
+  tasks:
+
+    - name: Pull latest Docker image
+      community.docker.docker_image:
+        name: "{{ docker_image }}"
+        source: pull
+
+    - name: Stop existing application container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        state: absent
+
+    - name: Start Java application container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        image: "{{ docker_image }}"
+        state: started
+        restart_policy: unless-stopped
+        ports:
+          - "{{ app_port }}:8080"
